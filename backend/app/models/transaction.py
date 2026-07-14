@@ -7,7 +7,7 @@ class Transaction(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     type = Column(String, nullable=False)
 
@@ -15,6 +15,6 @@ class Transaction(Base):
 
     amount = Column(Float, nullable=False)
 
-    description = Column(String)
+    description = Column(String, nullable=True)
 
-    date = Column(String)
+    date = Column(String, nullable=False)

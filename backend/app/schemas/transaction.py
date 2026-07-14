@@ -1,5 +1,3 @@
-from datetime import date
-
 from pydantic import BaseModel
 
 
@@ -9,7 +7,11 @@ class TransactionCreate(BaseModel):
     category: str
     amount: float
     description: str
-    date: date
+    date: str
+
+    payment_method: str
+    merchant: str
+    recurring: bool
 
 
 class TransactionResponse(BaseModel):
@@ -21,7 +23,11 @@ class TransactionResponse(BaseModel):
     category: str
     amount: float
     description: str
-    date: date
+    date: str
+
+    payment_method: str
+    merchant: str
+    recurring: bool
 
     class Config:
         from_attributes = True

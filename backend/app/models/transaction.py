@@ -1,4 +1,15 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from datetime import datetime
+
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+)
+
 from app.database.database import Base
 
 
@@ -7,14 +18,52 @@ class Transaction(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
 
-    type = Column(String, nullable=False)
+    type = Column(
+        String,
+        nullable=False
+    )
 
-    category = Column(String, nullable=False)
+    category = Column(
+        String,
+        nullable=False
+    )
 
-    amount = Column(Float, nullable=False)
+    amount = Column(
+        Float,
+        nullable=False
+    )
 
-    description = Column(String, nullable=True)
+    description = Column(
+        String
+    )
 
-    date = Column(String, nullable=False)
+    date = Column(
+        String,
+        nullable=False
+    )
+
+    payment_method = Column(
+        String,
+        default="UPI"
+    )
+
+    merchant = Column(
+        String,
+        default="Unknown"
+    )
+
+    recurring = Column(
+        Boolean,
+        default=False
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )

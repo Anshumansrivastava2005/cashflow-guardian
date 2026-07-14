@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.auth.auth import get_current_user
 from app.database.database import get_db
 from app.models.transaction import Transaction
 from app.models.user import User
 from app.schemas.transaction import TransactionCreate
-from app.auth.auth import get_current_user
 
 router = APIRouter(
     prefix="/transactions",
@@ -13,7 +13,23 @@ router = APIRouter(
 )
 
 
-# CREATE
+def get_logged_in_user(current_user: str, db: Session):
+
+    user = db.query(User).filter(
+        User.email == current_user
+    ).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+
+    return user
+
+
+# ---------------- CREATE ---------------- #
+
 @router.post("/")
 def add_transaction(
     transaction: TransactionCreate,
@@ -21,9 +37,7 @@ def add_transaction(
     db: Session = Depends(get_db)
 ):
 
-    user = db.query(User).filter(
-        User.email == current_user
-    ).first()
+    user = get_logged_in_user(current_user, db)
 
     new_transaction = Transaction(
         user_id=user.id,
@@ -31,7 +45,10 @@ def add_transaction(
         category=transaction.category,
         amount=transaction.amount,
         description=transaction.description,
-        date=transaction.date
+        date=transaction.date,
+        payment_method=transaction.payment_method,
+        merchant=transaction.merchant,
+        recurring=transaction.recurring
     )
 
     db.add(new_transaction)
@@ -44,23 +61,25 @@ def add_transaction(
     }
 
 
-# READ ALL
+# ---------------- READ ---------------- #
+
 @router.get("/")
 def get_transactions(
     current_user: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
 
-    user = db.query(User).filter(
-        User.email == current_user
-    ).first()
+    user = get_logged_in_user(current_user, db)
 
-    return db.query(Transaction).filter(
-        Transaction.user_id == user.id
-    ).all()
+    return (
+        db.query(Transaction)
+        .filter(Transaction.user_id == user.id)
+        .all()
+    )
 
 
-# READ ONE
+# ---------------- READ ONE ---------------- #
+
 @router.get("/{transaction_id}")
 def get_transaction(
     transaction_id: int,
@@ -68,14 +87,16 @@ def get_transaction(
     db: Session = Depends(get_db)
 ):
 
-    user = db.query(User).filter(
-        User.email == current_user
-    ).first()
+    user = get_logged_in_user(current_user, db)
 
-    transaction = db.query(Transaction).filter(
-        Transaction.id == transaction_id,
-        Transaction.user_id == user.id
-    ).first()
+    transaction = (
+        db.query(Transaction)
+        .filter(
+            Transaction.id == transaction_id,
+            Transaction.user_id == user.id
+        )
+        .first()
+    )
 
     if not transaction:
         raise HTTPException(
@@ -86,7 +107,8 @@ def get_transaction(
     return transaction
 
 
-# UPDATE
+# ---------------- UPDATE ---------------- #
+
 @router.put("/{transaction_id}")
 def update_transaction(
     transaction_id: int,
@@ -95,14 +117,16 @@ def update_transaction(
     db: Session = Depends(get_db)
 ):
 
-    user = db.query(User).filter(
-        User.email == current_user
-    ).first()
+    user = get_logged_in_user(current_user, db)
 
-    existing = db.query(Transaction).filter(
-        Transaction.id == transaction_id,
-        Transaction.user_id == user.id
-    ).first()
+    existing = (
+        db.query(Transaction)
+        .filter(
+            Transaction.id == transaction_id,
+            Transaction.user_id == user.id
+        )
+        .first()
+    )
 
     if not existing:
         raise HTTPException(
@@ -115,6 +139,9 @@ def update_transaction(
     existing.amount = transaction.amount
     existing.description = transaction.description
     existing.date = transaction.date
+    existing.payment_method = transaction.payment_method
+    existing.merchant = transaction.merchant
+    existing.recurring = transaction.recurring
 
     db.commit()
     db.refresh(existing)
@@ -125,7 +152,8 @@ def update_transaction(
     }
 
 
-# DELETE
+# ---------------- DELETE ---------------- #
+
 @router.delete("/{transaction_id}")
 def delete_transaction(
     transaction_id: int,
@@ -133,14 +161,16 @@ def delete_transaction(
     db: Session = Depends(get_db)
 ):
 
-    user = db.query(User).filter(
-        User.email == current_user
-    ).first()
+    user = get_logged_in_user(current_user, db)
 
-    existing = db.query(Transaction).filter(
-        Transaction.id == transaction_id,
-        Transaction.user_id == user.id
-    ).first()
+    existing = (
+        db.query(Transaction)
+        .filter(
+            Transaction.id == transaction_id,
+            Transaction.user_id == user.id
+        )
+        .first()
+    )
 
     if not existing:
         raise HTTPException(

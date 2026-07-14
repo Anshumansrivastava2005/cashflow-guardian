@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.models.transaction import Transaction
+from app.models.user import User
 from app.schemas.transaction import TransactionCreate
+from app.auth.auth import get_current_user
 
 router = APIRouter(
     prefix="/transactions",
@@ -15,11 +17,16 @@ router = APIRouter(
 @router.post("/")
 def add_transaction(
     transaction: TransactionCreate,
+    current_user: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
 
+    user = db.query(User).filter(
+        User.email == current_user
+    ).first()
+
     new_transaction = Transaction(
-        user_id=1,   # Temporary (JWT will replace this later)
+        user_id=user.id,
         type=transaction.type,
         category=transaction.category,
         amount=transaction.amount,
@@ -37,23 +44,37 @@ def add_transaction(
     }
 
 
-# READ
+# READ ALL
 @router.get("/")
-def get_transactions(db: Session = Depends(get_db)):
-    transactions = db.query(Transaction).all()
-
-    return transactions
-
-
-# READ BY ID
-@router.get("/{transaction_id}")
-def get_transaction(
-    transaction_id: int,
+def get_transactions(
+    current_user: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
 
+    user = db.query(User).filter(
+        User.email == current_user
+    ).first()
+
+    return db.query(Transaction).filter(
+        Transaction.user_id == user.id
+    ).all()
+
+
+# READ ONE
+@router.get("/{transaction_id}")
+def get_transaction(
+    transaction_id: int,
+    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    user = db.query(User).filter(
+        User.email == current_user
+    ).first()
+
     transaction = db.query(Transaction).filter(
-        Transaction.id == transaction_id
+        Transaction.id == transaction_id,
+        Transaction.user_id == user.id
     ).first()
 
     if not transaction:
@@ -70,11 +91,17 @@ def get_transaction(
 def update_transaction(
     transaction_id: int,
     transaction: TransactionCreate,
+    current_user: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
 
+    user = db.query(User).filter(
+        User.email == current_user
+    ).first()
+
     existing = db.query(Transaction).filter(
-        Transaction.id == transaction_id
+        Transaction.id == transaction_id,
+        Transaction.user_id == user.id
     ).first()
 
     if not existing:
@@ -102,11 +129,17 @@ def update_transaction(
 @router.delete("/{transaction_id}")
 def delete_transaction(
     transaction_id: int,
+    current_user: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
 
+    user = db.query(User).filter(
+        User.email == current_user
+    ).first()
+
     existing = db.query(Transaction).filter(
-        Transaction.id == transaction_id
+        Transaction.id == transaction_id,
+        Transaction.user_id == user.id
     ).first()
 
     if not existing:

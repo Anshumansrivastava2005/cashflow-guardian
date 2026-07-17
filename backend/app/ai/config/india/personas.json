@@ -1,0 +1,32 @@
+[
+    {
+        "name": "Student",
+        "salary_min": 5000,
+        "salary_max": 15000,
+        "lifestyle": "Student"
+    },
+    {
+        "name": "Software Engineer",
+        "salary_min": 40000,
+        "salary_max": 200000,
+        "lifestyle": "UpperMiddleClass"
+    },
+    {
+        "name": "Doctor",
+        "salary_min": 80000,
+        "salary_max": 500000,
+        "lifestyle": "Luxury"
+    },
+    {
+        "name": "Business Owner",
+        "salary_min": 50000,
+        "salary_max": 1000000,
+        "lifestyle": "Luxury"
+    },
+    {
+        "name": "Government Employee",
+        "salary_min": 35000,
+        "salary_max": 120000,
+        "lifestyle": "MiddleClass"
+    }
+]

@@ -1,0 +1,100 @@
+{
+    "Food": [
+        "Swiggy",
+        "Zomato",
+        "Dominos",
+        "Pizza Hut",
+        "McDonald's",
+        "KFC",
+        "Burger King",
+        "Subway",
+        "Starbucks",
+        "Cafe Coffee Day",
+        "Haldiram",
+        "Bikanervala",
+        "Behrouz",
+        "Faasos",
+        "FreshMenu",
+        "Wow Momo",
+        "EatSure",
+        "Barbeque Nation",
+        "Local Restaurant"
+    ],
+    "Shopping": [
+        "Amazon",
+        "Flipkart",
+        "Myntra",
+        "Ajio",
+        "Nykaa",
+        "Meesho",
+        "Reliance Digital",
+        "Croma",
+        "DMart",
+        "IKEA",
+        "Vijay Sales",
+        "Lifestyle",
+        "Pantaloons",
+        "Westside",
+        "Decathlon",
+        "Tata CliQ",
+        "Shoppers Stop"
+    ],
+    "Travel": [
+        "Uber",
+        "Ola",
+        "Rapido",
+        "IRCTC",
+        "RedBus",
+        "Goibibo",
+        "MakeMyTrip",
+        "Yatra",
+        "IndiGo",
+        "Air India",
+        "SpiceJet",
+        "Metro",
+        "Auto Rickshaw"
+    ],
+    "Bills": [
+        "Airtel",
+        "Jio",
+        "Vi",
+        "BSNL",
+        "ACT Fibernet",
+        "Electricity Board",
+        "Water Board",
+        "Gas Agency"
+    ],
+    "Entertainment": [
+        "Netflix",
+        "Amazon Prime",
+        "Disney+ Hotstar",
+        "Spotify",
+        "BookMyShow",
+        "PVR",
+        "INOX",
+        "Steam",
+        "PlayStation Store"
+    ],
+    "Medical": [
+        "Apollo Pharmacy",
+        "MedPlus",
+        "NetMeds",
+        "PharmEasy",
+        "1mg",
+        "Apollo Hospital",
+        "Fortis"
+    ],
+    "Fuel": [
+        "Indian Oil",
+        "HP",
+        "BPCL",
+        "Shell"
+    ],
+    "Investment": [
+        "Groww",
+        "Zerodha",
+        "Upstox",
+        "Angel One",
+        "Paytm Money"
+    ]
+}

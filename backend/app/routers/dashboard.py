@@ -146,7 +146,7 @@ def monthly_summary(
 
     for transaction in transactions:
 
-        month = transaction.date[:7]
+        month = transaction.date.strftime("%Y-%m")
 
         if transaction.type == "Income":
             monthly[month]["income"] += transaction.amount

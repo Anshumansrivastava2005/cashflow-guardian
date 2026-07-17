@@ -8,7 +8,8 @@ from app.schemas.user import UserCreate
 from app.auth.auth import (
     hash_password,
     verify_password,
-    create_access_token
+    create_access_token,
+    get_current_user,
 )
 
 router = APIRouter(
@@ -16,6 +17,8 @@ router = APIRouter(
     tags=["Users"]
 )
 
+
+# ---------------- REGISTER ---------------- #
 
 @router.post("/register")
 def register(
@@ -49,6 +52,8 @@ def register(
     }
 
 
+# ---------------- LOGIN ---------------- #
+
 @router.post("/login")
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -81,4 +86,31 @@ def login(
     return {
         "access_token": access_token,
         "token_type": "bearer"
+    }
+
+
+# ---------------- CURRENT USER ---------------- #
+
+@router.get("/me")
+def me(
+    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    user = (
+        db.query(User)
+        .filter(User.email == current_user)
+        .first()
+    )
+
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+
+    return {
+        "id": user.id,
+        "full_name": user.full_name,
+        "email": user.email,
     }

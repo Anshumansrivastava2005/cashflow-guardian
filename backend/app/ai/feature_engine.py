@@ -1,79 +1,189 @@
+"""
+feature_engine.py
+
+Builds ML-ready features from simulated financial data.
+"""
+
+from __future__ import annotations
+
 import pandas as pd
-from sqlalchemy.orm import Session
 
-from app.models.transaction import Transaction
+from app.database.database import SessionLocal
+from app.models.sim_user import SimUser
+from app.models.sim_transaction import SimTransaction
 
 
-class FeatureEngineer:
+class FeatureEngine:
 
-    def __init__(self, db: Session):
-        self.db = db
+    def __init__(self):
 
-    def load_transactions(self, user_id: int):
+        self.db = SessionLocal()
 
-        transactions = (
-            self.db.query(Transaction)
-            .filter(Transaction.user_id == user_id)
-            .all()
-        )
+    # ---------------------------------------------------------
 
-        data = []
+    def close(self):
 
-        for t in transactions:
+        self.db.close()
 
-            data.append({
-                "type": t.type,
-                "category": t.category,
-                "amount": t.amount,
-                "merchant": t.merchant,
-                "payment_method": t.payment_method,
-                "recurring": int(t.recurring),
-                "date": t.date
+    # ---------------------------------------------------------
+
+    def load_transactions(self):
+
+        return self.db.query(
+            SimTransaction
+        ).all()
+
+    # ---------------------------------------------------------
+
+    def build_dataset(self):
+
+        users = self.db.query(
+            SimUser
+        ).all()
+
+        dataset = []
+
+        for user in users:
+
+            transactions = self.db.query(
+                SimTransaction
+            ).filter(
+                SimTransaction.sim_user_id == user.id
+            ).all()
+
+            income = 0.0
+            expense = 0.0
+
+            food = 0.0
+            shopping = 0.0
+            travel = 0.0
+            bills = 0.0
+            entertainment = 0.0
+            healthcare = 0.0
+
+            recurring = 0
+            total_transactions = len(transactions)
+
+            for t in transactions:
+
+                if t.type == "Income":
+                    income += t.amount
+                else:
+                    expense += t.amount
+
+                if t.recurring:
+                    recurring += 1
+
+                category = t.category.lower()
+
+                if category == "food":
+                    food += t.amount
+
+                elif category == "shopping":
+                    shopping += t.amount
+
+                elif category == "travel":
+                    travel += t.amount
+
+                elif category in (
+                    "bills",
+                    "utilities"
+                ):
+                    bills += t.amount
+
+                elif category == "entertainment":
+                    entertainment += t.amount
+
+                elif category in (
+                    "health",
+                    "healthcare"
+                ):
+                    healthcare += t.amount
+
+            savings = income - expense
+
+            savings_rate = (
+                savings / income
+                if income > 0
+                else 0
+            )
+
+            recurring_ratio = (
+                recurring / total_transactions
+                if total_transactions > 0
+                else 0
+            )
+
+            dataset.append({
+
+                "user_id": user.id,
+
+                "age": user.age,
+
+                "monthly_income": user.monthly_income,
+
+                "income": round(income, 2),
+
+                "expense": round(expense, 2),
+
+                "savings": round(savings, 2),
+
+                "savings_rate": round(
+                    savings_rate,
+                    4
+                ),
+
+                "food_spend": round(food, 2),
+
+                "shopping_spend": round(
+                    shopping,
+                    2
+                ),
+
+                "travel_spend": round(
+                    travel,
+                    2
+                ),
+
+                "bills_spend": round(
+                    bills,
+                    2
+                ),
+
+                "entertainment_spend": round(
+                    entertainment,
+                    2
+                ),
+
+                "healthcare_spend": round(
+                    healthcare,
+                    2
+                ),
+
+                "transaction_count": total_transactions,
+
+                "recurring_ratio": round(
+                    recurring_ratio,
+                    4
+                )
+
             })
 
-        return pd.DataFrame(data)
+        return pd.DataFrame(dataset)
 
-    def generate_features(self, user_id: int):
 
-        df = self.load_transactions(user_id)
+# ---------------------------------------------------------
 
-        if df.empty:
-            return None
+if __name__ == "__main__":
 
-        income = df[df["type"] == "Income"]["amount"].sum()
+    engine = FeatureEngine()
 
-        expense = df[df["type"] == "Expense"]["amount"].sum()
+    df = engine.build_dataset()
 
-        savings = income - expense
+    print(df.head())
 
-        transaction_count = len(df)
+    print()
 
-        avg_transaction = df["amount"].mean()
+    print(df.shape)
 
-        max_transaction = df["amount"].max()
-
-        expense_ratio = 0
-
-        if income > 0:
-            expense_ratio = expense / income
-
-        merchant_count = df["merchant"].nunique()
-
-        payment_method_count = df["payment_method"].nunique()
-
-        recurring_count = df["recurring"].sum()
-
-        features = {
-            "income": income,
-            "expense": expense,
-            "savings": savings,
-            "expense_ratio": expense_ratio,
-            "transaction_count": transaction_count,
-            "average_transaction": avg_transaction,
-            "largest_transaction": max_transaction,
-            "merchant_count": merchant_count,
-            "payment_method_count": payment_method_count,
-            "recurring_transactions": recurring_count
-        }
-
-        return pd.DataFrame([features])
+    engine.close()

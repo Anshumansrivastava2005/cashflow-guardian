@@ -1,0 +1,19 @@
+{
+    "Income": [
+        "Salary",
+        "Freelancing",
+        "Business",
+        "Investment"
+    ],
+    "Expense": [
+        "Food",
+        "Shopping",
+        "Travel",
+        "Bills",
+        "Medical",
+        "Fuel",
+        "Entertainment",
+        "Education",
+        "Insurance"
+    ]
+}
